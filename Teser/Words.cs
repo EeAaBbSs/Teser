@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
-using Word = Microsoft.Office.Interop.Word;
-using System.IO;
 using System.Linq;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
@@ -12,24 +10,23 @@ namespace Teser
 {
     public class Words
     {
+        public static string ScanPath { get; set; }
+        public static string DocName { get; set; }
+
         public void CreateWord()
         {
             #region DocX doc
-
-            string docName = "KDnumber";
-            string filePath = $@"C:\Users\EABS\Desktop\Teser\{docName}.docx";
+            string filePath = $@"C:\Users\EABS\Desktop\Teser\{DocName}.docx";
             var doc = DocX.Create(filePath);
 
             #region Create Table
-
             doc.InsertParagraph();
             Table table = doc.AddTable(14, 2);
+
             table.Alignment = Alignment.left;
             table.Design = TableDesign.TableGrid;
 
             table.Rows[0].Cells[0].Paragraphs.First().Append("№ п/п");
-            table.Rows[0].Cells[1].Paragraphs.First().Append("-_-");
-
             table.Rows[1].Cells[0].Paragraphs.First().Append("Объект");
             table.Rows[2].Cells[0].Paragraphs.First().Append("Кадастровый номер");
             table.Rows[3].Cells[0].Paragraphs.First().Append("Действующая КС, руб.");
@@ -39,59 +36,54 @@ namespace Teser
             table.Rows[7].Cells[0].Paragraphs.First().Append("Возможное снижение КС, руб.");
             table.Rows[8].Cells[0].Paragraphs.First().Append("Налог на имущество при снижении КС, руб в год");
             table.Rows[9].Cells[0].Paragraphs.First().Append("Экономия, руб. в год");
-            table.Rows[10].Cells[0].Paragraphs.First().Append(
-                "Экономия ретроспектива, руб. в год(до 3 лет от даты определения КС до 01.01 текущего года)");
-            table.Rows[11].Cells[0].Paragraphs.First()
-                .Append("Экономия перспектива, руб. (за 3 года от 01.01 текущего года)");
-            table.Rows[12].Cells[0].Paragraphs.First()
-                .Append("Экономия перспектива, руб. (за 5 лет от 01.01 текущего года)");
+            table.Rows[10].Cells[0].Paragraphs.First().Append("Экономия ретроспектива, руб. в год(до 3 лет от даты определения КС до 01.01 текущего года)");
+            table.Rows[11].Cells[0].Paragraphs.First().Append("Экономия перспектива, руб. (за 3 года от 01.01 текущего года)");
+            table.Rows[12].Cells[0].Paragraphs.First().Append("Экономия перспектива, руб. (за 5 лет от 01.01 текущего года)");
             table.Rows[13].Cells[0].Paragraphs.First().Append("Примечания");
+            #endregion
 
-            DataBase DB = new DataBase();
+            #region table filling
             List<Object> dataCells = new List<Object>();
-            dataCells.Add(DB.obj);
-            dataCells.Add(DB.cost);
-            dataCells.Add(DB.KDNumber);
-            dataCells.Add(DB.KDDateDetermenation);
-            dataCells.Add(DB.taxYear);
-            dataCells.Add(DB.dropTax);
-            dataCells.Add(DB.dropTaxYear);
-            dataCells.Add(DB.saving);
-            dataCells.Add(DB.notes);
+            dataCells.Add("Данные об объекте");
+            dataCells.Add(DataBase.obj);
+            dataCells.Add(DataBase.KDNumber);
+            dataCells.Add(DataBase.cost);
+            dataCells.Add(DataBase.KDDateDetermenation);
+            dataCells.Add(DataBase.taxYear);
+            dataCells.Add(DataBase.dropTax);
+            dataCells.Add(DataBase.dropTaxYear);
+            dataCells.Add(DataBase.saving);
+            dataCells.Add(DataBase.notes);
 
-            //int rowCount = 1;
-            //foreach (var field in dataCells)
             for (int i = 0; i < dataCells.Count; i++)
             {
-                if (/*rowCount*/i <= 2)
+                if (i == 0)
                 {
-                    var URL = doc.AddHyperlink(Convert.ToString(/*field*/dataCells[i]), new Uri(@"C:\Users\EABS\Downloads\scanSample.pdf"));
-                    table.Rows[/*rowCount*/i].Cells[1].Paragraphs.First().AppendHyperlink(URL).Bold().Color(Color.Aqua);
+                    table.Rows[i].Cells[1].Paragraphs.First().Append(dataCells[i].ToString());
                 }
-                else if (/*rowCount*/i == 3)
+                else if (i > 0 && i <= 3)
                 {
-                    var URL = doc.AddHyperlink(Convert.ToString(/*field*/dataCells[i]), new Uri(@$"http://www.udmbti.ru/?kadN={/*field*/dataCells[i]}&btn=Узнать+кадастровую+стоимость+объекта#top-c"));
-                    table.Rows[/*rowCount*/i].Cells[1].Paragraphs.First().AppendHyperlink(URL).Bold().Color(Color.Aqua);
+                    var URL = doc.AddHyperlink(Convert.ToString(dataCells[i]), new Uri(ScanPath));
+                    URL.Text = dataCells[i].ToString();
+                    table.Rows[i].Cells[1].Paragraphs.First().AppendHyperlink(URL).Bold().Color(Color.Aqua);
                 }
-                //URL.Text = cellText.
-                //rowCount++;
+                else if (i == 4)
+                {
+                    string KDNForURL = Convert.ToString(dataCells[i - 2]).Replace(":", "%3A");
+                    var URL = doc.AddHyperlink(Convert.ToString(dataCells[i]), new Uri(@$"http://www.udmbti.ru/?kadN={KDNForURL}&btn=Узнать+кадастровую+стоимость+объекта#top-c"));
+                    URL.Text = dataCells[i].ToString();
+                    table.Rows[i].Cells[1].Paragraphs.First().AppendHyperlink(URL).Bold().Color(Color.Aqua);
+                }
+                else
+                {
+                    table.Rows[i].Cells[1].Paragraphs.First().Append(dataCells[i].ToString());
+                }
             }
-
-            //var cellText = String.Empty;
-            //for (int i = 1; i < table.RowCount; i++)
-            //{
-            //    cellText += "1";
-            //    var url = doc.AddHyperlink(cellText, new Uri("https://www.youtube.com/"));
-            //    url.Text = cellText;
-            //    table.Rows[i].Cells[1].Paragraphs.First().AppendHyperlink(url).Bold().Color(Color.Aqua);
-            //}
+            #endregion
 
             doc.InsertTable(table);
             doc.Save();
             Process.Start("WINWORD.EXE", filePath);
-
-            #endregion
-
             #endregion
         }
     }

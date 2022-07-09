@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Windows.Forms;
 
@@ -17,15 +12,15 @@ namespace Teser
         public SqlCommand command = new SqlCommand();
         public SqlDataAdapter adapter = new SqlDataAdapter();
 
-        public string obj = String.Empty;
-        public string cost = String.Empty;
-        public string KDNumber = String.Empty;
-        public string KDDateDetermenation = String.Empty;
-        public int taxYear = 20000;
-        public int dropTax = 550000;
-        public int dropTaxYear = 11000;
-        public int saving = 9000;
-        public string notes = "String.Empty";
+        public static string obj = String.Empty;
+        public static string cost = String.Empty;
+        public static string KDNumber = String.Empty;
+        public static string KDDateDetermenation = String.Empty;
+        public static int taxYear = 20000;
+        public static int dropTax = 550000;
+        public static int dropTaxYear = 11000;
+        public static int saving = 9000;
+        public static string notes = String.Empty;
 
         public void OpenConnection()
         {
@@ -34,7 +29,7 @@ namespace Teser
                 sqlConnection.Open();
                 MessageBox.Show("Подключение выполнено успешно");
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 MessageBox.Show("Ошибка!", "Невозможно подключиться к Базе Данных", MessageBoxButtons.OK,
                     MessageBoxIcon.Exclamation);
@@ -51,7 +46,7 @@ namespace Teser
                     MessageBox.Show("Connection are closed");
                 }
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 MessageBox.Show("Ошибка!", "Невозможно закрыть соединение с Базой данных", MessageBoxButtons.OK,
                     MessageBoxIcon.Exclamation);
@@ -68,7 +63,7 @@ namespace Teser
                 cost = scanDoc.FindKadCost(abc);
                 KDDateDetermenation = scanDoc.FindKDdateDetermenation(KDNumber);
                 string sqlExpression =
-                    $"INSERT INTO testTable (Object, KDNumber, KDcost, KDdateDetermenation, taxYear, dropTax, dropTaxYear, saving, notes) VALUES ('{obj}', '{cost}', '{KDNumber}', '{KDDateDetermenation}', '{taxYear}', '{dropTax}', '{dropTaxYear}', '{saving}', '{notes}')";
+                    $"INSERT INTO testTable (Object, KDNumber, KDcost, KDdateDetermenation, taxYear, dropTax, dropTaxYear, saving, notes) VALUES ('{obj}', '{KDNumber}', '{cost}', '{KDDateDetermenation}', '{taxYear}', '{dropTax}', '{dropTaxYear}', '{saving}', '{notes}')";
                 sqlConnection.Open();
                 command = new SqlCommand(sqlExpression, sqlConnection);
                 command.ExecuteNonQuery();

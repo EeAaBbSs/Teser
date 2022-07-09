@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 namespace Teser
 {
     public class ScanDoc
@@ -53,7 +47,7 @@ namespace Teser
             string findRes;
             string[] arForNumAndCost = inputData.Split(' ');
             int indOfThirdR = Array.IndexOf(arForNumAndCost, "руб.:");
-            if (Array.IndexOf(arForNumAndCost, "номер:") == -1)
+            if (Array.IndexOf(arForNumAndCost, "руб.:") == -1)
             {
                 throw new Exception("Кадастровая стоимость не найдена");
             }
